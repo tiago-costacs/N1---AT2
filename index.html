@@ -1,0 +1,210 @@
+Quiz personagens · HTML
+Copiar
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crônicas de Aethermoor — Descubra seu Personagem</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+ 
+  <!-- ===== TELA INICIAL ===== -->
+  <div id="screen-welcome" class="screen active">
+    <div class="hero-crown">✦</div>
+    <h1 class="site-title">Crônicas de Aethermoor</h1>
+    <p class="site-subtitle">Descubra qual guardião do reino você seria</p>
+ 
+    <div class="divider"><div class="divider-gem"></div></div>
+ 
+    <div class="lore-box">
+      <p>
+        Em um mundo suspenso entre as estrelas e as sombras, existe o reino de <strong>Aethermoor</strong> — uma terra onde o Éter, a energia primordial do universo, flui por cada pedra, rio e alma viva. Três antigas ordens guardam o equilíbrio desta terra: os Tecelões do Éter, os Guardiões da Chama Sombria e os Navegadores do Vazio. Cada ordem é personificada por um lendário guardião, cujas virtudes moldaram o destino de Aethermoor através dos séculos.
+      </p>
+      <br>
+      <p>
+        Responda às dez perguntas a seguir com sinceridade. O Oráculo de Aethermoor analisará suas escolhas e revelará qual dos três guardiões ressoa com a sua essência. Sua jornada começa agora.
+      </p>
+    </div>
+ 
+    <div class="characters-preview">
+      <div class="char-preview-card char-a">
+        <div class="char-avatar">🌊</div>
+        <div class="char-preview-name">Seraphine</div>
+        <div class="char-preview-role">Tecelã do Éter</div>
+      </div>
+      <div class="char-preview-card char-b">
+        <div class="char-avatar">🔥</div>
+        <div class="char-preview-name">Valdris</div>
+        <div class="char-preview-role">Guardião da Chama</div>
+      </div>
+      <div class="char-preview-card char-c">
+        <div class="char-avatar">🌌</div>
+        <div class="char-preview-name">Nyx</div>
+        <div class="char-preview-role">Navegadora do Vazio</div>
+      </div>
+    </div>
+ 
+    <button class="btn-primary" onclick="App.startQuiz()">Iniciar a Jornada</button>
+  </div>
+ 
+  <!-- ===== TELA DO QUESTIONÁRIO ===== -->
+  <div id="screen-quiz" class="screen">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-bar"></div>
+    </div>
+    <div class="question-counter" id="question-counter">Pergunta 1 de 10</div>
+    <div class="question-text" id="question-text"></div>
+    <ul class="options-list" id="options-list"></ul>
+    <div class="quiz-nav">
+      <button class="btn-nav btn-back" id="btn-back" onclick="App.prevQuestion()">← Voltar</button>
+      <button class="btn-nav btn-next" id="btn-next" onclick="App.nextQuestion()" disabled>Próxima →</button>
+    </div>
+  </div>
+ 
+  <!-- ===== TELA DE RESULTADO ===== -->
+  <div id="screen-result" class="screen">
+    <div class="result-header">
+      <div class="result-label">O Oráculo revelou</div>
+      <div class="result-char-name" id="result-name"></div>
+      <div class="result-char-role" id="result-role"></div>
+    </div>
+    <div class="divider"><div class="divider-gem"></div></div>
+    <div class="result-card" id="result-card">
+      <div class="result-avatar" id="result-avatar"></div>
+      <div class="result-info">
+        <h3>Sua Essência</h3>
+        <p class="result-desc" id="result-desc"></p>
+      </div>
+    </div>
+    <div class="scores-grid" id="scores-grid"></div>
+    <button class="btn-primary" onclick="App.restart()" style="margin-top:2rem;">Recomeçar a Jornada</button>
+    <button class="btn-secondary" onclick="App.goHome()">← Voltar ao início</button>
+  </div>
+ 
+</div>
+ 
+<script>
+// ===== DADOS DO JOGO =====
+class GameData {
+  static characters = [
+    {
+      id: 'A',
+      name: 'Seraphine',
+      role: 'Tecelã do Éter',
+      emoji: '🌊',
+      cssClass: 'char-a',
+      color: '#4fc3c3',
+      description: 'Você é Seraphine, a Tecelã do Éter. Sua alma pulsa com a sabedoria das marés e a paciência das estrelas. Você enxerga conexões invisíveis entre as coisas, preferindo curar a ferir e compreender a julgar. Em Aethermoor, você seria a guardiã dos segredos mais antigos da magia — aquela a quem todos buscam quando o caos ameaça o equilíbrio. Sua força está na empatia e na capacidade de encontrar harmonia onde outros veem apenas conflito.'
+    },
+    {
+      id: 'B',
+      name: 'Valdris',
+      role: 'Guardião da Chama Sombria',
+      emoji: '🔥',
+      cssClass: 'char-b',
+      color: '#e05c5c',
+      description: 'Você é Valdris, o Guardião da Chama Sombria. Sua essência arde com a determinação de quem carrega o peso do mundo nos ombros. Você age quando outros hesitam, lidera quando outros recuam, e nunca abandona aqueles sob sua proteção. Em Aethermoor, você seria o escudo vivo do reino — temido pelos inimigos, admirado pelos aliados. Sua força está na coragem inabalável e no compromisso fervoroso com a justiça.'
+    },
+    {
+      id: 'C',
+      name: 'Nyx',
+      role: 'Navegadora do Vazio',
+      emoji: '🌌',
+      cssClass: 'char-c',
+      color: '#8b5cf6',
+      description: 'Você é Nyx, a Navegadora do Vazio. Sua mente viaja por entre as frestas da realidade, vislumbrando possibilidades que ninguém mais consegue perceber. Você prefere a solidão produtiva ao barulho vazio, e cada ação sua carrega o peso de uma estratégia calculada. Em Aethermoor, você seria a mente por trás das maiores reviravoltas do destino — um enigma que move as peças do tabuleiro enquanto outros dormem. Sua força está na inteligência singular e na visão além do horizonte.'
+    }
+  ];
+ 
+  static questions = [
+    {
+      text: 'Ao encontrar um viajante ferido na estrada, qual é sua primeira reação?',
+      options: [
+        { text: 'Cuidar dos ferimentos imediatamente, usando seus conhecimentos de cura.', scores: { A: 3, B: 2, C: 1 } },
+        { text: 'Verificar se há perigo nas redondezas antes de ajudar.', scores: { A: 1, B: 3, C: 2 } },
+        { text: 'Observar o viajante para determinar se a situação é genuína ou uma armadilha.', scores: { A: 2, B: 1, C: 3 } }
+      ]
+    },
+    {
+      text: 'Qual ambiente você escolheria para passar uma tarde livre?',
+      options: [
+        { text: 'À beira de um lago cristalino, meditando ao som da água.', scores: { A: 3, B: 1, C: 2 } },
+        { text: 'Em uma arena de treinamento, aprimorando suas habilidades de combate.', scores: { A: 1, B: 3, C: 2 } },
+        { text: 'Em uma biblioteca antiga, decifrando textos perdidos.', scores: { A: 2, B: 1, C: 3 } }
+      ]
+    },
+    {
+      text: 'Quando um conflito surge entre amigos próximos, você tende a:',
+      options: [
+        { text: 'Mediar a situação, ouvindo todos os lados com paciência.', scores: { A: 3, B: 2, C: 1 } },
+        { text: 'Tomar partido daquele que acredita estar certo e defender sua posição.', scores: { A: 1, B: 3, C: 2 } },
+        { text: 'Analisar a situação em silêncio e oferecer uma solução lógica e definitiva.', scores: { A: 2, B: 1, C: 3 } }
+      ]
+    },
+    {
+      text: 'Qual habilidade você mais gostaria de possuir em Aethermoor?',
+      options: [
+        { text: 'Controlar as energias do Éter para curar e criar.', scores: { A: 3, B: 1, C: 2 } },
+        { text: 'Dominar o fogo como uma extensão da sua vontade.', scores: { A: 1, B: 3, C: 2 } },
+        { text: 'Atravessar as dimensões do Vazio e manipular o espaço-tempo.', scores: { A: 2, B: 1, C: 3 } }
+      ]
+    },
+    {
+      text: 'Diante de um inimigo muito mais poderoso que você, sua estratégia é:',
+      options: [
+        { text: 'Tentar estabelecer um diálogo e encontrar uma solução pacífica.', scores: { A: 3, B: 1, C: 2 } },
+        { text: 'Enfrentá-lo diretamente, confiando na sua força e determinação.', scores: { A: 1, B: 3, C: 2 } },
+        { text: 'Recuar, estudar seus pontos fracos e aguardar o momento certo para agir.', scores: { A: 2, B: 1, C: 3 } }
+      ]
+    },
+    {
+      text: 'O que você mais valoriza em um companheiro de jornada?',
+      options: [
+        { text: 'Empatia e capacidade de se importar com os outros.', scores: { A: 3, B: 2, C: 1 } },
+        { text: 'Lealdade inabalável e coragem mesmo diante do perigo.', scores: { A: 2, B: 3, C: 1 } },
+        { text: 'Inteligência aguçada e visão estratégica das situações.', scores: { A: 1, B: 2, C: 3 } }
+      ]
+    },
+    {
+      text: 'Ao descobrir um antigo segredo do reino, você:',
+      options: [
+        { text: 'Compartilha o conhecimento com líderes de confiança para o bem comum.', scores: { A: 3, B: 2, C: 1 } },
+        { text: 'Usa o segredo imediatamente para proteger o povo do reino.', scores: { A: 1, B: 3, C: 2 } },
+        { text: 'Guarda o segredo até entender completamente suas implicações.', scores: { A: 2, B: 1, C: 3 } }
+      ]
+    },
+    {
+      text: 'Como você prefere passar a noite antes de uma grande batalha?',
+      options: [
+        { text: 'Conversando com seus companheiros, fortalecendo os laços de confiança.', scores: { A: 3, B: 2, C: 1 } },
+        { text: 'Afiando suas armas e realizando rituais de preparação mental.', scores: { A: 1, B: 3, C: 2 } },
+        { text: 'Revisando mapas, estratégias e possíveis cenários da batalha.', scores: { A: 2, B: 1, C: 3 } }
+      ]
+    },
+    {
+      text: 'Se pudesse escolher um símbolo para representar sua alma, seria:',
+      options: [
+        { text: 'Uma onda do oceano — fluida, poderosa e ao mesmo tempo gentil.', scores: { A: 3, B: 1, C: 2 } },
+        { text: 'Uma chama — intensa, ardente e capaz de iluminar a escuridão.', scores: { A: 1, B: 3, C: 2 } },
+        { text: 'Uma constelação — distante, enigmática e guia de viajantes perdidos.', scores: { A: 2, B: 1, C: 3 } }
+      ]
+    },
+    {
+      text: 'Qual frase ressoa mais profundamente com a sua essência?',
+      options: [
+        { text: '"A maior força não está em vencer, mas em unir."', scores: { A: 3, B: 2, C: 1 } },
+        { text: '"Nunca recuo. Nunca abandono. Nunca me rendo."', scores: { A: 1, B: 3, C: 2 } },
+        { text: '"Aquele que conhece o todo, governa o tempo."', scores: { A: 2, B: 1, C: 3 } }
+      ]
+    }
+  ];
+}
+</script>
+<script src="script.js"></script>
+</body>
+</html>
